@@ -11,6 +11,11 @@ export class ManagerCommand extends BaseCommand<
   TombalaConnectionManager
 > {
   handle(socket: Socket, conn?: Connection, message?: any) {
+    const available = this.checkAlreadyPlaying(conn);
+    if (!available) {
+      return;
+    }
+
     const game = this.gameManager.create();
     const admin = game.getManager();
 
@@ -24,5 +29,23 @@ export class ManagerCommand extends BaseCommand<
 
     const roomId = this.ioManager.getRoomId(game.getId());
     socket.join(roomId);
+  }
+
+  checkAlreadyPlaying(con?: Connection): boolean {
+    if (!con) {
+      return false;
+    }
+
+    const details = con.getDetails<TombalaConnectionDetails>();
+
+    if (!details) {
+      return true;
+    }
+
+    if (details.isInitialized()) {
+      return false;
+    }
+
+    return true;
   }
 }

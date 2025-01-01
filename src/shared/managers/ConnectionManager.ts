@@ -66,8 +66,13 @@ export abstract class ConnectionManager {
     this.addListeners(conn.getSocket());
   }
 
-  updateSocket(name: string, socket: Socket): Connection | null {
-    const conn = this.findConnectionByCode(name);
+  updateSocket(
+    name: string,
+    secret: string,
+    socket: Socket
+  ): Connection | null {
+    const code = `${name}-${secret}`;
+    const conn = this.findConnectionByCode(code);
 
     if (conn) {
       if (conn.getSocket().id !== socket.id) {

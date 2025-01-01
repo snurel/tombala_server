@@ -21,7 +21,7 @@ export abstract class Game {
     this.gameState = GameState.OVER;
   }
 
-  killGame() {}
+  abstract killGame(): void;
 
   abstract startGame(): void;
 }

@@ -40,7 +40,11 @@ export class Connection {
     this.user = user;
   }
 
-  getUserCode(): string | undefined {
+  getUserName(): string | undefined {
     return this.user?.getName();
+  }
+
+  getUserCode(): string | undefined {
+    return `${this.user?.getName()}-${this.user?.getSecret()}`;
   }
 }

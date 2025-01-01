@@ -21,19 +21,20 @@ export class LoginCommand extends BaseCommand<
       return;
     }
 
-    const isBack = this.handleReconnect(socket, message.name);
+    const isBack = this.handleReconnect(socket, message.name, message.secret);
     if (isBack) {
       this.connectionManager.connections.delete(socket.id);
     } else {
-      const user = new User(message.name);
+      const user = new User(message.name, message.secret);
       conn.setUser(user);
-      socket.emit(TombalaMessages.NameInitialized, message.name);
+      socket.emit(TombalaMessages.NameInitialized, message);
     }
   }
 
-  handleReconnect(socket: Socket, userName: string): boolean {
+  handleReconnect(socket: Socket, userName: string, secret: string): boolean {
     const lastConnection = this.connectionManager.updateSocket(
       userName,
+      secret,
       socket
     );
 

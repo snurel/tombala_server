@@ -11,13 +11,13 @@ export class TombalaGame extends Game {
   private founds: number[] = [];
   private remainings: number[] = [];
   private manager!: GameAdmin;
-  private players: Map<number, TombalaPlayer>;
-  private static MAX_NUM = 99;
+  private players: TombalaPlayer[];
+  private static MAX_NUM = 29;
 
   constructor(gameId: number) {
     super(gameId);
     this.colors = new ColorPalette();
-    this.players = new Map();
+    this.players = [];
   }
 
   setManager(admin: GameAdmin) {
@@ -36,15 +36,15 @@ export class TombalaGame extends Game {
 
     this.founds.push(lucky);
 
-    this.getPlayers().forEach((player) => {
+    this.players.forEach((player) => {
       player.checkNum(lucky);
     });
 
     return lucky;
   }
 
-  private getPlayers(): TombalaPlayer[] {
-    return [...this.players.values()];
+  getPlayers(): TombalaPlayer[] {
+    return this.players;
   }
 
   private generateRandomNumbers(): number[] {
@@ -92,13 +92,13 @@ export class TombalaGame extends Game {
       color
     );
 
-    this.players.set(player.getId(), player);
+    this.players.push(player);
 
     return player;
   }
 
   checkResult(): TombalaPlayer[] {
-    const winners = this.getPlayers().filter((p) => p.allFounded());
+    const winners = this.players.filter((p) => p.allFounded());
     const ended = this.remainings.length === 0;
     if (ended) {
       this.gameOver();
@@ -107,8 +107,21 @@ export class TombalaGame extends Game {
     return winners;
   }
 
+  gameOver(): void {
+    super.gameOver();
+  }
+
   removePlayer(playerId: number) {
-    this.players.delete(playerId);
+    const index = this.players.findIndex((p) => p.getId() === playerId);
+    if (index > -1) {
+      this.players.splice(index, 1);
+    }
+  }
+
+  removePlayers(playerIds: number[]) {
+    this.players = this.players.filter(
+      (p) => playerIds.indexOf(p.getId()) === -1
+    );
   }
 
   resetNumbers() {
@@ -117,7 +130,7 @@ export class TombalaGame extends Game {
   }
 
   resetPlayers() {
-    this.getPlayers().forEach((player) => {
+    this.players.forEach((player) => {
       player.resetSlots();
     });
   }
@@ -126,5 +139,9 @@ export class TombalaGame extends Game {
     this.gameState = GameState.STARTED;
     this.resetPlayers();
     this.resetNumbers();
+  }
+
+  killGame(): void {
+    // throw new Error('Method not implemented.');
   }
 }

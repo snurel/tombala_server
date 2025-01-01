@@ -32,7 +32,7 @@ export class IOManager {
       socket.onAny((arg) => {
         Logger.info('New Message Received >>> ' + arg);
         if (socket.listenerCount(arg) === 0) {
-          Logger.info(`Client Event: ${arg} has no listeners!`);
+          Logger.warn(`Client Event: ${arg} has no listeners!`);
         }
       });
 

@@ -2,6 +2,6 @@ import { JoinGameInfoMessage } from './JoinGameInfoMessage';
 
 export type PlayerJoinedMessage = {
   name: string;
-  id: string;
+  id: number;
   info: JoinGameInfoMessage;
 };
