@@ -1,13 +1,19 @@
 import { Socket } from 'socket.io';
-import { Connection } from '../components/Connection';
-import { BaseCommand } from './BaseCommand';
+import { Connection } from '../../shared/components/Connection';
+import { BaseCommand } from '../../shared/abstractClasses/BaseCommand';
 import { PlayerJoinMessage } from '../messages/PlayerJoinMessage';
-import { Messages } from '../enums/Messages';
-import Logger from '../Utility/Logger';
+import Logger from '../../shared/utility/Logger';
 import { PlayerJoinedMessage } from '../messages/PlayerJoinedMessage';
 import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
+import { TombalaMessages } from '../enums/Messages';
+import { TombalaGameManager } from '../managers/TombalaGameManager';
+import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
-export class JoinGameCommand extends BaseCommand {
+export class JoinGameCommand extends BaseCommand<
+  TombalaGameManager,
+  TombalaConnectionManager
+> {
   handle(socket: Socket, conn: Connection, message?: PlayerJoinMessage) {
     Logger.info(
       `Name received: ${JSON.stringify(message)} -> from: ${socket.id}`
@@ -20,7 +26,7 @@ export class JoinGameCommand extends BaseCommand {
     const game = this.gameManager.getGame(Number(message.code));
     if (!game) {
       socket.emit(
-        Messages.GameNotFound,
+        TombalaMessages.GameNotFound,
         `Oyun bulunumadı! Kodu (${message.code} kontrol etmelisiniz!)`
       );
       return;
@@ -28,22 +34,24 @@ export class JoinGameCommand extends BaseCommand {
 
     if (game.isStarted()) {
       socket.emit(
-        Messages.AlreadyStarted,
+        TombalaMessages.AlreadyStarted,
         'Oyun başladı. Bitince tekrar deneyin'
       );
       return;
     }
 
-    const name = conn.getName();
+    const name = conn.getUserCode();
 
     if (!name) {
-      socket.emit(Messages.AlreadyStarted, 'Oyuncu bulunamadı!');
+      socket.emit(TombalaMessages.AlreadyStarted, 'Oyuncu bulunamadı!');
       return;
     }
 
     const player = game.addPlayer(name);
 
-    conn.initPlayer(player);
+    const details = new TombalaConnectionDetails();
+    details.initPlayer(player);
+    conn.setDetails(details);
 
     const infoMessage = {
       gameId: game.getId(),
@@ -51,25 +59,27 @@ export class JoinGameCommand extends BaseCommand {
       color: player.getColor(),
     } as JoinGameInfoMessage;
 
-    this.notifyManager(game.getManagerId(), conn, infoMessage);
+    this.gameManager.managers.get();
+
+    this.notifyManager(game.getManager().getId(), conn, infoMessage);
 
     const roomId = this.ioManager.getRoomId(game.getId());
     socket.join(roomId);
 
-    socket.emit(Messages.JoinedToGame, infoMessage);
+    socket.emit(TombalaMessages.JoinedToGame, infoMessage);
   }
 
   notifyManager(
     managerId: string,
-    user: Connection,
+    conn: Connection,
     info: JoinGameInfoMessage
   ) {
     const managerUser = this.connectionManager.connections.get(managerId);
     const joinInfo = {
-      name: user.getName(),
-      id: user.id,
+      name: conn.getUserCode(),
+      id: conn.getId(),
       info,
     } as PlayerJoinedMessage;
-    managerUser?.socket.emit(Messages.NewPlayerJoined, joinInfo);
+    managerUser?.getSocket().emit(TombalaMessages.NewPlayerJoined, joinInfo);
   }
 }

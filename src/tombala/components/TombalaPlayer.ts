@@ -1,13 +1,9 @@
 import { SlotType } from '../enums/SlotType';
+import { Player } from '../../shared/components/Player';
 
-export class Player {
-  private gameId: number;
+export class TombalaPlayer extends Player {
   private slots: SlotType[];
   private cardColor: string;
-  private id: number;
-  private name: string;
-
-  private connectionId?: string;
 
   constructor(
     id: number,
@@ -16,31 +12,9 @@ export class Player {
     slots: SlotType[],
     color: string
   ) {
-    this.id = id;
-    this.name = name;
-    this.gameId = gameId;
+    super(id, name, gameId);
     this.slots = slots;
     this.cardColor = color;
-  }
-
-  getId(): number {
-    return this.id;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  getGameId(): number {
-    return this.gameId;
-  }
-
-  setConnectionId(conId: string) {
-    this.connectionId = conId;
-  }
-
-  getConnectionId(): string | undefined {
-    return this.connectionId;
   }
 
   getSlots(): SlotType[] {

@@ -1,10 +1,10 @@
 import { Server as SocketIOServer } from 'socket.io';
 import express from 'express';
 import http from 'http';
-import { ConnectionManager } from './ConnectionManager';
 import { Connection } from '../components/Connection';
-import { Messages } from '../enums/Messages';
-import Logger from '../Utility/Logger';
+import { ConnectionManager } from './ConnectionManager';
+import Logger from '../utility/Logger';
+import { Messages } from '../abstractClasses/Messages';
 
 export class IOManager {
   static instance: IOManager;
@@ -27,8 +27,10 @@ export class IOManager {
     });
 
     this.io.on('connection', (socket) => {
-      const user = new Connection(socket);
-      ConnectionManager.instance.addConnection(user);
+      Logger.info(`New Connection: ${socket.id}`);
+
+      const connection = new Connection(socket);
+      ConnectionManager.getInstance().addConnection(connection);
     });
 
     const PORT = 5200;
@@ -46,6 +48,6 @@ export class IOManager {
   }
 
   broadcastToRoom(roomId: string, command: Messages, message?: any) {
-    this.io.to(roomId).emit(command, message);
+    this.io.to(roomId).emit(command as string, message);
   }
 }

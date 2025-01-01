@@ -1,12 +1,19 @@
 import { Socket } from 'socket.io';
-import { Connection } from '../components/Connection';
-import { BaseCommand } from './BaseCommand';
-import { Messages } from '../enums/Messages';
-import Logger from '../Utility/Logger';
+import { Connection } from '../../shared/components/Connection';
+import { BaseCommand } from '../../shared/abstractClasses/BaseCommand';
 import { InitPlayerMessage } from '../messages/InitPlayerMessage';
 import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
+import Logger from '../../shared/utility/Logger';
+import { User } from '../../shared/components/User';
+import { TombalaMessages } from '../enums/Messages';
+import { TombalaGameManager } from '../managers/TombalaGameManager';
+import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
-export class LoginCommand extends BaseCommand {
+export class LoginCommand extends BaseCommand<
+  TombalaGameManager,
+  TombalaConnectionManager
+> {
   handle(socket: Socket, conn: Connection, message?: InitPlayerMessage) {
     Logger.info(`New Login: ${JSON.stringify(message)} -> from: ${socket.id}`);
 
@@ -18,8 +25,9 @@ export class LoginCommand extends BaseCommand {
     if (isBack) {
       this.connectionManager.connections.delete(socket.id);
     } else {
-      conn.setName(message.name);
-      socket.emit(Messages.NameInitialized, message.name);
+      const user = new User(message.name);
+      conn.setUser(user);
+      socket.emit(TombalaMessages.NameInitialized, message.name);
     }
   }
 
@@ -33,11 +41,12 @@ export class LoginCommand extends BaseCommand {
       return false;
     }
 
-    if (!lastConnection.player) {
+    const player =
+      lastConnection.getDetails<TombalaConnectionDetails>()?.player;
+
+    if (!player) {
       return false;
     }
-
-    const player = lastConnection.player;
 
     const currentGame = this.gameManager.getGame(player.getGameId());
 
@@ -54,7 +63,7 @@ export class LoginCommand extends BaseCommand {
     const roomId = this.ioManager.getRoomId(currentGame.getId());
     socket.join(roomId);
 
-    socket.emit(Messages.Reconnect, info);
+    socket.emit(TombalaMessages.Reconnect, info);
     return true;
   }
 }
