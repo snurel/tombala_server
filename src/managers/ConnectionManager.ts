@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { Messages } from '../enums/Messages';
 import { BaseCommand } from '../commands/BaseCommand';
 import { LoginCommand } from '../commands/LoginCommand';
@@ -10,24 +10,24 @@ import { JoinGameCommand } from '../commands/JoinGameCommand';
 import { StartGameCommand } from '../commands/StartGameCommand';
 import { TakeNumberCommand } from '../commands/TakeNumberCommand';
 
-export class UserManager {
-  users: Map<string, User>;
-  private connectionUserMap: Map<string, Socket[]>;
+export class ConnectionManager {
+  connections: Map<string, Connection>;
+  private connectionPlayerMap: Map<number, Socket[]>;
 
-  static instance: UserManager;
+  static instance: ConnectionManager;
   private commands: Map<Messages, BaseCommand>;
 
   static init() {
     if (!this.instance) {
-      this.instance = new UserManager();
+      this.instance = new ConnectionManager();
     }
 
     this.instance.initCommands();
   }
 
   constructor() {
-    this.users = new Map();
-    this.connectionUserMap = new Map();
+    this.connections = new Map();
+    this.connectionPlayerMap = new Map();
     this.commands = new Map();
   }
 
@@ -53,7 +53,7 @@ export class UserManager {
 
   handleMessage = (event: Messages, socket: any, isOnce?: boolean) => {
     const listener = (message: any) => {
-      const user = this.users.get(socket.id);
+      const user = this.connections.get(socket.id);
 
       const handler = this.commands.get(event);
       if (handler) {
@@ -70,35 +70,35 @@ export class UserManager {
     }
   };
 
-  addUser(user: User) {
-    const exist = this.users.has(user.id);
+  addConnection(conn: Connection) {
+    const exist = this.connections.has(conn.id);
     if (!exist) {
-      this.users.set(user.id, user);
+      this.connections.set(conn.id, conn);
     }
 
-    this.addListeners(user.socket);
+    this.addListeners(conn.socket);
   }
 
-  updateSocket(name: string, socket: Socket): User | null {
-    const user = this.findUserByName(name);
+  updateSocket(name: string, socket: Socket): Connection | null {
+    const conn = this.findConnectionByName(name);
 
-    if (user) {
-      if (user.socket.id !== socket.id) {
-        user.socket.disconnect();
+    if (conn) {
+      if (conn.socket.id !== socket.id) {
+        conn.socket.disconnect();
       }
 
-      user.socket = socket;
+      conn.socket = socket;
 
-      return user;
+      return conn;
     }
 
     return null;
   }
 
-  private findUserByName(name: string): User | undefined {
-    for (const user of this.users.values()) {
-      if (user.getName() === name) {
-        return user;
+  private findConnectionByName(name: string): Connection | undefined {
+    for (const conn of this.connections.values()) {
+      if (conn.getName() === name) {
+        return conn;
       }
     }
     return undefined;

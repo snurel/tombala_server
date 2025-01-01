@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { BaseCommand } from './BaseCommand';
 import { Messages } from '../enums/Messages';
 import Logger from '../Utility/Logger';
@@ -7,7 +7,7 @@ import { InitPlayerMessage } from '../messages/InitPlayerMessage';
 import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
 
 export class LoginCommand extends BaseCommand {
-  handle(socket: Socket, user: User, message?: InitPlayerMessage) {
+  handle(socket: Socket, conn: Connection, message?: InitPlayerMessage) {
     Logger.info(`New Login: ${JSON.stringify(message)} -> from: ${socket.id}`);
 
     if (!message) {
@@ -16,24 +16,30 @@ export class LoginCommand extends BaseCommand {
 
     const isBack = this.handleReconnect(socket, message.name);
     if (isBack) {
-      this.userManager.users.delete(socket.id);
+      this.connectionManager.connections.delete(socket.id);
     } else {
-      user.setName(message.name);
+      conn.setName(message.name);
       socket.emit(Messages.NameInitialized, message.name);
     }
   }
 
   handleReconnect(socket: Socket, userName: string): boolean {
-    const currentUser = this.userManager.updateSocket(userName, socket);
-    if (!currentUser) {
+    const lastConnection = this.connectionManager.updateSocket(
+      userName,
+      socket
+    );
+
+    if (!lastConnection) {
       return false;
     }
 
-    if (!currentUser.gameId) {
+    if (!lastConnection.player) {
       return false;
     }
 
-    const currentGame = this.gameManager.getGame(currentUser.gameId);
+    const player = lastConnection.player;
+
+    const currentGame = this.gameManager.getGame(player.getGameId());
 
     if (!currentGame || !currentGame.isStarted()) {
       return false;
@@ -41,8 +47,8 @@ export class LoginCommand extends BaseCommand {
 
     const info = {
       gameId: currentGame.getId(),
-      color: currentUser.color,
-      slots: currentUser.slots,
+      color: player.getColor(),
+      slots: player.getSlots(),
     } as JoinGameInfoMessage;
 
     const roomId = this.ioManager.getRoomId(currentGame.getId());

@@ -1,15 +1,15 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { BaseCommand } from './BaseCommand';
 import { Messages } from '../enums/Messages';
 
 export class TakeNumberCommand extends BaseCommand {
-  handle(socket: Socket, user?: User, message?: any) {
-    if (!user || !user.managementGameId) {
+  handle(socket: Socket, conn?: Connection, message?: any) {
+    if (!conn || !conn.admin) {
       return;
     }
 
-    const game = this.gameManager.getGame(user.managementGameId);
+    const game = this.gameManager.getGame(conn.admin.getGameId());
 
     if (!game) {
       return;

@@ -12,6 +12,7 @@ export enum Messages {
   ManagerDisconnected = 'manager_disconnected',
   JoinedToGame = 'joined_to_game',
   AlreadyStarted = 'already_started',
+  PlayerNotFound = 'player_not_found',
   TakeNumber = 'take_number',
   GameOver = 'game_over',
 }

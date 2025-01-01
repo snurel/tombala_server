@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { BaseCommand } from './BaseCommand';
 import { PlayerJoinMessage } from '../messages/PlayerJoinMessage';
 import { Messages } from '../enums/Messages';
@@ -8,12 +8,12 @@ import { PlayerJoinedMessage } from '../messages/PlayerJoinedMessage';
 import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
 
 export class JoinGameCommand extends BaseCommand {
-  handle(socket: Socket, user: User, message?: PlayerJoinMessage) {
+  handle(socket: Socket, conn: Connection, message?: PlayerJoinMessage) {
     Logger.info(
       `Name received: ${JSON.stringify(message)} -> from: ${socket.id}`
     );
 
-    if (!user || !message) {
+    if (!conn || !message) {
       return;
     }
 
@@ -34,19 +34,37 @@ export class JoinGameCommand extends BaseCommand {
       return;
     }
 
-    user.initPlayer(game.getId());
+    const name = conn.getName();
 
-    const info = game.addPlayer(user);
-    this.notifyManager(game.getManager(), user, info);
+    if (!name) {
+      socket.emit(Messages.AlreadyStarted, 'Oyuncu bulunamadı!');
+      return;
+    }
+
+    const player = game.addPlayer(name);
+
+    conn.initPlayer(player);
+
+    const infoMessage = {
+      gameId: game.getId(),
+      slots: player.getSlots(),
+      color: player.getColor(),
+    } as JoinGameInfoMessage;
+
+    this.notifyManager(game.getManagerId(), conn, infoMessage);
 
     const roomId = this.ioManager.getRoomId(game.getId());
     socket.join(roomId);
 
-    socket.emit(Messages.JoinedToGame, info);
+    socket.emit(Messages.JoinedToGame, infoMessage);
   }
 
-  notifyManager(managerId: string, user: User, info: JoinGameInfoMessage) {
-    const managerUser = this.userManager.users.get(managerId);
+  notifyManager(
+    managerId: string,
+    user: Connection,
+    info: JoinGameInfoMessage
+  ) {
+    const managerUser = this.connectionManager.connections.get(managerId);
     const joinInfo = {
       name: user.getName(),
       id: user.id,

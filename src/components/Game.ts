@@ -1,13 +1,13 @@
 import { GameState } from '../enums/GameState';
 import { SlotType } from '../enums/SlotType';
-import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
+import { GameManager } from '../managers/GameManager';
 import { ColorPalette } from './ColorPalette';
-import { User } from './User';
+import { Player } from './Player';
 
 export class Game {
   private id: number;
   private managerId: string;
-  private players: Map<string, User>;
+  private players: Map<number, Player>;
   private founds: number[] = [];
   private remainings: number[] = [];
   private gameState: GameState;
@@ -58,7 +58,7 @@ export class Game {
     });
   }
 
-  checkResult(): User[] {
+  checkResult(): Player[] {
     const winners = this.getPlayers().filter((p) => p.allFounded());
     const ended = this.remainings.length === 0;
     if (ended) {
@@ -68,26 +68,28 @@ export class Game {
     return winners;
   }
 
-  addPlayer(player: User): JoinGameInfoMessage {
-    this.players.set(player.id, player);
-
+  addPlayer(name: string): Player {
     const slots = this.selectSlots();
     const color = this.colors.getColor();
-    player.setSlots(slots);
-    player.setColor(color);
 
-    return {
-      gameId: this.id,
-      color,
+    const player = new Player(
+      GameManager.generateId(),
+      name,
+      this.id,
       slots,
-    };
+      color
+    );
+
+    this.players.set(player.getId(), player);
+
+    return player;
   }
 
   isStarted(): boolean {
     return this.gameState === GameState.STARTED;
   }
 
-  removePlayer(playerId: string) {
+  removePlayer(playerId: number) {
     this.players.delete(playerId);
   }
 
@@ -97,11 +99,11 @@ export class Game {
 
   killGame() {}
 
-  getManager(): string {
+  getManagerId(): string {
     return this.managerId;
   }
 
-  private getPlayers(): User[] {
+  private getPlayers(): Player[] {
     return [...this.players.values()];
   }
 

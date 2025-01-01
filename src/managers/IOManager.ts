@@ -1,8 +1,8 @@
 import { Server as SocketIOServer } from 'socket.io';
 import express from 'express';
 import http from 'http';
-import { UserManager } from './UserManager';
-import { User } from '../components/User';
+import { ConnectionManager } from './ConnectionManager';
+import { Connection } from '../components/Connection';
 import { Messages } from '../enums/Messages';
 import Logger from '../Utility/Logger';
 
@@ -27,8 +27,8 @@ export class IOManager {
     });
 
     this.io.on('connection', (socket) => {
-      const user = new User(socket);
-      UserManager.instance.addUser(user);
+      const user = new Connection(socket);
+      ConnectionManager.instance.addConnection(user);
     });
 
     const PORT = 5200;

@@ -1,12 +1,12 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { BaseCommand } from './BaseCommand';
 import { Messages } from '../enums/Messages';
 
 export class ManagerCommand extends BaseCommand {
-  handle(socket: Socket, user?: User, message?: any) {
-    const gameId = this.gameManager.createGame(user!.id);
-    user?.initManager(gameId);
+  handle(socket: Socket, conn?: Connection, message?: any) {
+    const { gameId, admin } = this.gameManager.createGame(conn!.id);
+    conn?.initAdmin(admin);
     socket.emit(Messages.Manager, { gameId });
 
     const roomId = this.ioManager.getRoomId(gameId);

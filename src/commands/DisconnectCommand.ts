@@ -1,20 +1,24 @@
 import { Socket } from 'socket.io';
-import { User } from '../components/User';
+import { Connection } from '../components/Connection';
 import { BaseCommand } from './BaseCommand';
 import { Messages } from '../enums/Messages';
 import Logger from '../Utility/Logger';
 
 export class DisconnectCommand extends BaseCommand {
-  handle(socket: Socket, user?: User) {
-    Logger.info(`User disconnected: ${socket.id}`);
+  handle(socket: Socket, conn?: Connection) {
+    Logger.info(`Connection lost: ${socket.id}`);
     const id = socket.id.toString();
 
-    this.handleGamePlayerLeft(user);
-    this.handleManagerLeft(id);
+    this.handlePlayerLeft(conn);
+    this.handleManagerLeft(conn);
   }
 
-  handleManagerLeft(userId: string) {
-    const managedGameId = this.gameManager.managers.get(userId);
+  handleManagerLeft(conn?: Connection) {
+    if (!conn || !conn.admin) {
+      return;
+    }
+
+    const managedGameId = this.gameManager.managers.get(conn.admin.getId());
     if (!managedGameId) {
       return;
     }
@@ -33,15 +37,15 @@ export class DisconnectCommand extends BaseCommand {
       );
     }
 
-    this.gameManager.clearGame(managedGameId, userId);
+    this.gameManager.clearGame(managedGameId, conn.admin.getId());
   }
 
-  handleGamePlayerLeft(user?: User) {
-    if (!user || !user.gameId) {
+  handlePlayerLeft(conn?: Connection) {
+    if (!conn || !conn.player) {
       return;
     }
 
-    const userGame = this.gameManager.getGame(user.gameId);
+    const userGame = this.gameManager.getGame(conn.player.getGameId());
     if (!userGame) {
       return;
     }
@@ -50,10 +54,14 @@ export class DisconnectCommand extends BaseCommand {
       return;
     }
 
-    this.userManager.users.delete(user.id);
+    this.connectionManager.connections.delete(conn.id);
 
-    userGame.removePlayer(user.id);
+    userGame.removePlayer(conn.player.getId());
 
-    this.ioManager.broadcastToGame(user.gameId, Messages.PlayerLeft, user.id);
+    this.ioManager.broadcastToGame(
+      conn.player.getGameId(),
+      Messages.PlayerLeft,
+      conn.id
+    );
   }
 }
