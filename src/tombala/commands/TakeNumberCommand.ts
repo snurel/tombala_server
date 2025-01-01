@@ -4,7 +4,7 @@ import { BaseCommand } from '../../shared/abstractClasses/BaseCommand';
 import { TombalaGame } from '../components/TombalaGame';
 import { TombalaMessages } from '../enums/Messages';
 import { TombalaGameManager } from '../managers/TombalaGameManager';
-import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionManager } from '../managers/TombalaConnectionManager';
 import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
 export class TakeNumberCommand extends BaseCommand<

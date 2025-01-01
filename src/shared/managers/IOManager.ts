@@ -29,8 +29,16 @@ export class IOManager {
     this.io.on('connection', (socket) => {
       Logger.info(`New Connection: ${socket.id}`);
 
+      socket.onAny((arg) => {
+        Logger.info('New Message Received >>> ' + arg);
+        if (socket.listenerCount(arg) === 0) {
+          Logger.info(`Client Event: ${arg} has no listeners!`);
+        }
+      });
+
       const connection = new Connection(socket);
       ConnectionManager.getInstance().addConnection(connection);
+      Logger.info(`All Listeners add for Connection: ${socket.id}`);
     });
 
     const PORT = 5200;

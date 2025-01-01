@@ -33,7 +33,7 @@ export abstract class ConnectionManager {
   }
 
   private addListeners(socket: Socket): void {
-    [...this.commands.values()].forEach((cmd) => {
+    [...this.commands.keys()].forEach((cmd) => {
       this.handleMessage(cmd, socket);
     });
   }

@@ -2,7 +2,7 @@ import { Socket } from 'socket.io';
 import { Connection } from '../../shared/components/Connection';
 import { BaseCommand } from '../../shared/abstractClasses/BaseCommand';
 import { TombalaGameManager } from '../managers/TombalaGameManager';
-import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionManager } from '../managers/TombalaConnectionManager';
 import { TombalaMessages } from '../enums/Messages';
 import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 

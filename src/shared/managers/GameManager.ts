@@ -30,11 +30,11 @@ export abstract class GameManager {
     return this.games.get(id);
   }
 
-  create<T extends Game>(): T {
+  create(): Game {
     const gameId = this.generateUniqueCode();
     const game = this.createGame(gameId);
     this.games.set(game.getId(), game);
-    return game as T;
+    return game;
   }
 
   clear(gameId: number) {

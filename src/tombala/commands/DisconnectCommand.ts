@@ -4,7 +4,7 @@ import { BaseCommand } from '../../shared/abstractClasses/BaseCommand';
 import Logger from '../../shared/utility/Logger';
 import { TombalaMessages } from '../enums/Messages';
 import { TombalaGameManager } from '../managers/TombalaGameManager';
-import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionManager } from '../managers/TombalaConnectionManager';
 import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
 export class DisconnectCommand extends BaseCommand<

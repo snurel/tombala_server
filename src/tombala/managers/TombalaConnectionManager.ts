@@ -1,9 +1,9 @@
-import { LoginCommand } from '../../tombala/commands/LoginCommand';
-import { DisconnectCommand } from '../../tombala/commands/DisconnectCommand';
-import { ManagerCommand } from '../../tombala/commands/ManagerCommand';
-import { JoinGameCommand } from '../../tombala/commands/JoinGameCommand';
-import { StartGameCommand } from '../../tombala/commands/StartGameCommand';
-import { TakeNumberCommand } from '../../tombala/commands/TakeNumberCommand';
+import { LoginCommand } from '../commands/LoginCommand';
+import { DisconnectCommand } from '../commands/DisconnectCommand';
+import { ManagerCommand } from '../commands/ManagerCommand';
+import { JoinGameCommand } from '../commands/JoinGameCommand';
+import { StartGameCommand } from '../commands/StartGameCommand';
+import { TakeNumberCommand } from '../commands/TakeNumberCommand';
 import { ConnectionManager } from '../../shared/managers/ConnectionManager';
 import { TombalaMessages } from '../enums/Messages';
 

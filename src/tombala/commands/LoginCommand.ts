@@ -7,7 +7,7 @@ import Logger from '../../shared/utility/Logger';
 import { User } from '../../shared/components/User';
 import { TombalaMessages } from '../enums/Messages';
 import { TombalaGameManager } from '../managers/TombalaGameManager';
-import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionManager } from '../managers/TombalaConnectionManager';
 import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
 export class LoginCommand extends BaseCommand<

@@ -7,7 +7,7 @@ import { PlayerJoinedMessage } from '../messages/PlayerJoinedMessage';
 import { JoinGameInfoMessage } from '../messages/JoinGameInfoMessage';
 import { TombalaMessages } from '../enums/Messages';
 import { TombalaGameManager } from '../managers/TombalaGameManager';
-import { TombalaConnectionManager } from '../managers/TombalaConectionManager';
+import { TombalaConnectionManager } from '../managers/TombalaConnectionManager';
 import { TombalaConnectionDetails } from './TombalaConnectionDetails';
 
 export class JoinGameCommand extends BaseCommand<
@@ -16,7 +16,7 @@ export class JoinGameCommand extends BaseCommand<
 > {
   handle(socket: Socket, conn: Connection, message?: PlayerJoinMessage) {
     Logger.info(
-      `Name received: ${JSON.stringify(message)} -> from: ${socket.id}`
+      `JoinGame received: ${JSON.stringify(message)} -> from: ${socket.id}`
     );
 
     if (!conn || !message) {
@@ -59,9 +59,20 @@ export class JoinGameCommand extends BaseCommand<
       color: player.getColor(),
     } as JoinGameInfoMessage;
 
-    this.gameManager.managers.get();
+    const managerSocketId = this.gameManager.getManagerSocketId(
+      game.getManager().getId()
+    );
 
-    this.notifyManager(game.getManager().getId(), conn, infoMessage);
+    if (!managerSocketId) {
+      Logger.error(
+        `JoinGameCommand FAILED! managerSocketId NOT FOUND | socket: ${
+          socket.id
+        } | gameId: ${game.getId()}`
+      );
+      return;
+    }
+
+    this.notifyManager(managerSocketId, conn, infoMessage);
 
     const roomId = this.ioManager.getRoomId(game.getId());
     socket.join(roomId);
@@ -74,12 +85,12 @@ export class JoinGameCommand extends BaseCommand<
     conn: Connection,
     info: JoinGameInfoMessage
   ) {
-    const managerUser = this.connectionManager.connections.get(managerId);
+    const managerCon = this.connectionManager.connections.get(managerId);
     const joinInfo = {
       name: conn.getUserCode(),
       id: conn.getId(),
       info,
     } as PlayerJoinedMessage;
-    managerUser?.getSocket().emit(TombalaMessages.NewPlayerJoined, joinInfo);
+    managerCon?.getSocket().emit(TombalaMessages.NewPlayerJoined, joinInfo);
   }
 }
