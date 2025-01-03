@@ -6,6 +6,7 @@ import { StartGameCommand } from '../commands/StartGameCommand';
 import { TakeNumberCommand } from '../commands/TakeNumberCommand';
 import { ConnectionManager } from '../../shared/managers/ConnectionManager';
 import { TombalaMessages } from '../enums/Messages';
+import { QuitGameCommand } from '../commands/QuitGameCommand';
 
 export class TombalaConnectionManager extends ConnectionManager {
   initCommands() {
@@ -15,5 +16,6 @@ export class TombalaConnectionManager extends ConnectionManager {
     this.initCommand(TombalaMessages.Disconnect, new DisconnectCommand());
     this.initCommand(TombalaMessages.Start, new StartGameCommand());
     this.initCommand(TombalaMessages.TakeNumber, new TakeNumberCommand());
+    this.initCommand(TombalaMessages.QuitGame, new QuitGameCommand());
   }
 }

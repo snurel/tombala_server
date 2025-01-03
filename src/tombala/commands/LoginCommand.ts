@@ -59,6 +59,7 @@ export class LoginCommand extends BaseCommand<
       gameId: currentGame.getId(),
       color: player.getColor(),
       slots: player.getSlots(),
+      playId: player.getId(),
     } as JoinGameInfoMessage;
 
     const roomId = this.ioManager.getRoomId(currentGame.getId());

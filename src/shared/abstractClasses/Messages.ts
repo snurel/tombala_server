@@ -3,6 +3,7 @@ export abstract class Messages {
   static readonly Reconnect = 'reconnect';
   static readonly Login = 'login';
   static readonly JoinGame = 'join_game';
+  static readonly QuitGame = 'quit_game';
   static readonly Start = 'start_game';
   static readonly GameNotFound = 'game_not_found';
   static readonly NewPlayerJoined = 'new_player_joined';

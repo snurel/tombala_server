@@ -59,6 +59,7 @@ export class JoinGameCommand extends BaseCommand<
       gameId: game.getId(),
       slots: player.getSlots(),
       color: player.getColor(),
+      playId: player.getId(),
     } as JoinGameInfoMessage;
 
     const managerSocketId = this.gameManager.getManagerSocketId(
